@@ -53,7 +53,9 @@ const PropertyDetails = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const res = await fetch(`http://localhost:4900/property/${PropertyId}`);
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4900/";
+        const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+        const res = await fetch(`${cleanBaseUrl}/property/${PropertyId}`);
         if (res.ok) {
           const data = await res.json();
           setSingleProperty(data);

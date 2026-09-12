@@ -22,8 +22,10 @@ const NewListing = () => {
   const handleApproved = async (statusId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === "approved" ? "pending" : "approved";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4900/";
+      const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
       const response = await fetch(
-        `http://localhost:4900/property/${statusId}`,
+        `${cleanBaseUrl}/property/${statusId}`,
         {
           method: "PATCH",
           headers: {

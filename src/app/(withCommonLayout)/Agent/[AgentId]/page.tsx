@@ -13,7 +13,9 @@ const AgentDetails = async ({ params }: { params: Promise<TParams> }) => {
   const { AgentId } = await params;
   let agent: any = null;
   try {
-    const res = await fetch(`http://localhost:4900/users/${AgentId}`, {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4900/";
+    const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    const res = await fetch(`${cleanBaseUrl}/users/${AgentId}`, {
       cache: "no-store",
     });
     if (res.ok) {
