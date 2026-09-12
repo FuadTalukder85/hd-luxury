@@ -1,0 +1,75 @@
+"use client";
+import React from "react";
+import Container from "../../../shared/components/ui/Container";
+import Image from "next/image";
+import company01 from "../../../assets/images/companyLogo/company01.png";
+import company02 from "../../../assets/images/companyLogo/company02.png";
+import company03 from "../../../assets/images/companyLogo/company03.png";
+import company04 from "../../../assets/images/companyLogo/company04.png";
+import company05 from "../../../assets/images/companyLogo/company05.png";
+import company06 from "../../../assets/images/companyLogo/company06.png";
+import Slider from "react-slick";
+
+const TrustedCompany = () => {
+  const settings = {
+    arrows: false,
+    dots: true,
+    infinite: true,
+    speed: 400,
+    slidesToShow: 6,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2000,
+    appendDots: (dots: React.ReactNode) => (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "5px",
+        }}
+      >
+        {dots}
+      </div>
+    ),
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 5,
+          slidesToScroll: 1,
+          infinite: true,
+          dots: true,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          infinite: true,
+          dots: true,
+        },
+      },
+    ],
+  };
+
+  return (
+    <Container>
+      <div className="relative -mt-16 z-50">
+        <h5 className="font-bold bg-white p-5 md:w-[350px] text-seaBlue">
+          Trusted by over 150+ major companies
+        </h5>
+        <Slider {...settings} className="py-5">
+          <Image width={200} height={200} src={company01} alt="company01" />
+          <Image width={200} height={200} src={company02} alt="company02" />
+          <Image width={200} height={200} src={company03} alt="company03" />
+          <Image width={200} height={200} src={company04} alt="company04" />
+          <Image width={200} height={200} src={company05} alt="company05" />
+          <Image width={200} height={200} src={company06} alt="company06" />
+        </Slider>
+      </div>
+    </Container>
+  );
+};
+
+export default TrustedCompany;

@@ -1,0 +1,409 @@
+"use client";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import TopHeader from "./TopHeader";
+import Container from "../ui/Container";
+import { FaFacebook, FaRegUser, FaTwitterSquare } from "react-icons/fa";
+import { IoIosLogOut, IoLogoYoutube, IoMdClose } from "react-icons/io";
+import { FaLinkedinIn } from "react-icons/fa";
+import Link from "next/link";
+import gsap from "gsap";
+import LoginForm from "../../../components/Form/LoginForm";
+import RegisterForm from "../../../components/Form/RegisterForm";
+import { AuthContext } from "../../providers/AuthProvider";
+import UpdateProfileModal from "../../../components/Modal/UpdateProfileModal";
+import { usePathname } from "next/navigation";
+import { RiHome4Line, RiMenuFold2Fill } from "react-icons/ri";
+import Image from "next/image";
+import logo from "../../../assets/images/real-estate-logo.png";
+import { IoCloseSharp } from "react-icons/io5";
+import { useGetUserQuery } from "../../redux/api/UserApi";
+import { LoginInputs } from "../../types/types";
+import ReusableBtn from "../ui/reusableBtn";
+import { MdOutlineSpaceDashboard } from "react-icons/md";
+
+const Header = () => {
+  const pathName = usePathname();
+  const { user, logOut } = useContext(AuthContext);
+  const { data } = useGetUserQuery("");
+  const currentUser = data?.find((dt: LoginInputs) => dt.email === user?.email);
+
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLUListElement | null>(null);
+  const profileBtnRef = useRef<HTMLButtonElement | null>(null);
+  const menuItems = [
+    { name: "Home", path: "/" },
+    { name: "Property", path: "/Property" },
+    { name: "Agent", path: "/Agent" },
+    { name: "Blog", path: "/Blog" },
+    { name: "About Us", path: "/AboutUs" },
+    { name: "Contact", path: "/Contact" },
+  ];
+
+  const handleLogout = () => {
+    logOut()
+      .then(() => {})
+      .catch((error) => console.log(error));
+  };
+
+  useEffect(() => {
+    const initAnimation = (
+      triggerSelector: string,
+      modalSelector: string,
+      closeSelector: string
+    ) => {
+      const trigger = document.querySelector(triggerSelector);
+      const modal = document.querySelector(modalSelector);
+      const close = document.querySelector(closeSelector);
+
+      if (trigger && modal) {
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo(
+          modal,
+          { opacity: 0, visibility: "hidden", y: -50 },
+          { opacity: 1, visibility: "visible", y: 0, duration: 0.5 }
+        );
+        trigger.addEventListener("click", () => tl.play());
+        if (close) {
+          close.addEventListener("click", () => tl.reverse());
+        }
+      }
+    };
+
+    initAnimation("#login", "#loginForm", "#loginForm i");
+    initAnimation("#register", "#registerForm", "#registerClose");
+  }, []);
+
+  const toggleDropdown = () => {
+    setDropdownVisible((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        profileBtnRef.current &&
+        !profileBtnRef.current.contains(event.target as Node)
+      ) {
+        setDropdownVisible(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  const handleShowModal = () => {
+    setShowModal(!showModal);
+  };
+
+  const getDynamicLink = (path: string) => {
+    if (pathName === path) {
+      return "text-seaBlue bg-white px-2 rounded-sm font-bold";
+    }
+    if (
+      pathName.startsWith("/Property") &&
+      (path === "/Property" || path === "/Property/[id]")
+    ) {
+      return "text-seaBlue bg-white px-2 rounded-sm font-bold";
+    }
+    if (
+      pathName.startsWith("/Agent") &&
+      (path === "/Agent" || path === "/Agent/[id]")
+    ) {
+      return "text-seaBlue bg-white px-2 rounded-sm font-bold";
+    }
+    return "text-white";
+  };
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMenuOpen]);
+
+  return (
+    <div className="relative z-50">
+      <div className="hidden md:block">
+        <TopHeader />
+      </div>
+      <div className="bg-seaBlue">
+        <Container>
+          {/* responsive menu */}
+          <div className="bg-white flex md:hidden justify-between items-center py-2 px-3 md:px-0 fixed w-full top-0 left-0 z-50">
+            <Link href="/">
+              <Image src={logo} alt="logo" width={100} />
+            </Link>
+
+            <button
+              id="menu"
+              className="bg-seaBlue text-white text-2xl px-2 py-1 rounded-md hover:bg-yellow transition-all duration-500"
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <RiMenuFold2Fill />
+            </button>
+
+            {/* Sidebar Menu */}
+            <div
+              id="menuStyle"
+              className={`fixed h-screen w-[350px] top-0 z-50 bg-[#F7F7F7] p-3 transition-all duration-500 ${
+                isMenuOpen
+                  ? "left-0 opacity-100 visible"
+                  : "-left-[320px] opacity-0 invisible"
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <Link href="/">
+                  <Image src={logo} alt="logo" width={100} />
+                </Link>
+                <button
+                  id="closeBtn"
+                  className="bg-seaBlue text-white text-xl px-2 py-1 rounded-md hover:bg-yellow transition-all duration-500"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <IoCloseSharp />
+                </button>
+              </div>
+
+              <ul className="mt-5 space-y-2">
+                <li className="flex justify-end">
+                  {user ? (
+                    <>
+                      {currentUser?.role === "Admin" ||
+                      currentUser?.role === "Agent" ? (
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center justify-between w-32 rounded-[4px] font-semibold bg-seaBlue text-white px-3 py-2"
+                        >
+                          <MdOutlineSpaceDashboard className="text-xl" />
+                          Dashboard
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/account"
+                          className="flex items-center justify-between w-32 rounded-[4px] font-semibold bg-seaBlue text-white px-3 py-2"
+                        >
+                          <RiHome4Line className="text-xl" />
+                          My Profile
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex gap-3 justify-end font-semibold py-2">
+                      <Link href="/Login">
+                        <ReusableBtn>Sign in</ReusableBtn>
+                      </Link>
+                      <Link href="/Register">
+                        <button className="bg-seaBlue text-white py-2 px-4 text-sm font-semibold uppercase rounded-[4px] hover:bg-seaBlue transition-all duration-700">
+                          Register
+                        </button>
+                      </Link>
+                    </div>
+                  )}
+                </li>
+                {menuItems.map((item) => (
+                  <li key={item.path} className="py-2 border-b border-light">
+                    <Link href={item.path}>{item.name}</Link>
+                  </li>
+                ))}
+              </ul>
+
+              {user && (
+                <div className="mt-5">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center justify-between w-32 rounded-[4px] font-semibold text-seaBlue px-3 border border-seaBlue py-2 hover:bg-seaBlue hover:text-white transition-all duration-500"
+                  >
+                    Logout
+                    <IoLogoYoutube className="text-xl" />
+                  </button>
+                </div>
+              )}
+
+              <ul className="flex gap-3 justify-center bg-white py-2 text-seaBlue mt-5 text-2xl">
+                <li>
+                  <FaFacebook />
+                </li>
+                <li>
+                  <IoLogoYoutube />
+                </li>
+                <li>
+                  <FaLinkedinIn />
+                </li>
+                <li>
+                  <FaTwitterSquare />
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="hidden md:flex justify-between items-center py-1">
+            <div>
+              <ul className="gap-2 flex uppercase font-bold text-sm">
+                {menuItems.map((item, index) => (
+                  <li key={item.path} className="flex items-center">
+                    <Link
+                      href={item.path}
+                      className={`px-2 rounded-sm hover:bg-white hover:text-seaBlue transition-all duration-500 ${getDynamicLink(
+                        item.path
+                      )}`}
+                    >
+                      {item.name}
+                    </Link>
+                    {index !== menuItems.length - 1 && (
+                      <span className="ps-2 border-r h-3"></span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <ul className="flex gap-3 items-center text-white">
+                <li>
+                  <FaFacebook />
+                </li>
+                <li>
+                  <IoLogoYoutube />
+                </li>
+                <li>
+                  <FaLinkedinIn />
+                </li>
+                <li className="flex items-center">
+                  <FaTwitterSquare />
+                  <span className="ps-8 border-r h-3"></span>
+                </li>
+                {user ? (
+                  <>
+                    <div className="relative text-sm font-bold">
+                      <button
+                        className="uppercase ms-5 bg-white text-seaBlue p-2 text-lg rounded-[4px] hover:bg-yellow hover:text-white transition-all duration-500"
+                        onClick={toggleDropdown}
+                        ref={profileBtnRef}
+                      >
+                        <FaRegUser />
+                      </button>
+                      {isDropdownVisible && (
+                        <ul
+                          ref={dropdownRef}
+                          className="absolute w-44 right-0 bg-white text-seaBlue font-semibold rounded-md shadow-md mt-1 z-50"
+                        >
+                          <li
+                            onClick={() => {
+                              handleShowModal();
+                              setDropdownVisible(false);
+                            }}
+                            className="px-4 py-2 border-b border-b-yellow hover:bg-gray-100 hover:rounded-t-md hover:text-yellow transition-all duration-700 ease-in-out cursor-pointer"
+                          >
+                            Update Profile
+                          </li>
+                          <li className="px-4 py-2 border-b border-b-yellow hover:bg-gray-100 hover:rounded-t-md hover:text-yellow transition-all duration-700 ease-in-out cursor-pointer">
+                            {currentUser?.role === "Admin" ||
+                            currentUser?.role === "Agent" ? (
+                              <Link href="/dashboard">Dashboard</Link>
+                            ) : (
+                              <Link href="/account">My Profile</Link>
+                            )}
+                          </li>
+                          <li className="px-4 py-2 hover:bg-gray-100 hover:rounded-t-md hover:text-yellow transition-all duration-700 ease-in-out cursor-pointer">
+                            <button onClick={handleLogout}>Logout</button>
+                          </li>
+                        </ul>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex py-2">
+                      <li className="ps-5 text-sm font-semibold">
+                        <button
+                          className="pe-3 uppercase hover:text-yellow transition-all duration-700 ease-in-out"
+                          id="login"
+                        >
+                          Sign in
+                        </button>
+                        <div
+                          id="loginForm"
+                          className="overflow-hidden absolute right-[360px] bg-white drop-shadow-md w-96 text-black px-5 py-5 mt-3 z-50"
+                          style={{ opacity: 0, visibility: "hidden" }}
+                        >
+                          <div>
+                            <div className="flex justify-between items-center border-b-2 border-[#F7F7F7]">
+                              <h5 className="text-yellow text-lg font-semibold pb-2">
+                                Welcome to HD LUXURY
+                              </h5>
+                              <i className="text-2xl">
+                                <IoMdClose className="p-1 rounded-md cursor-pointer hover:bg-[#ABACB0]" />
+                              </i>
+                            </div>
+                            <div>
+                              <LoginForm />
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li className="text-sm font-semibold">
+                        <div>
+                          /
+                          <button
+                            className="ps-3 uppercase hover:text-yellow transition-all duration-700 ease-in-out"
+                            id="register"
+                          >
+                            Register
+                          </button>
+                          <div
+                            id="registerForm"
+                            className="overflow-hidden absolute right-[360px] bg-white drop-shadow-md w-96 text-black px-5 py-5 mt-3 z-50"
+                            style={{ opacity: 0, visibility: "hidden" }}
+                          >
+                            <div>
+                              <div className="flex justify-between items-center border-b-2 border-[#F7F7F7]">
+                                <h5 className="text-yellow text-lg font-semibold pb-2">
+                                  Please Register
+                                </h5>
+                                <div id="registerClose" className="text-2xl">
+                                  <IoMdClose className="p-1 rounded-md cursor-pointer hover:bg-[#ABACB0]" />
+                                </div>
+                              </div>
+                              <div>
+                                <RegisterForm />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </div>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+        </Container>
+      </div>
+      <div className="relative">
+        {showModal && (
+          <div className="absolute right-96 top-20 z-50">
+            <UpdateProfileModal
+              onClose={() => {
+                setShowModal(false);
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Header;
